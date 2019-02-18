@@ -13,17 +13,32 @@ If `landscape` (install from [here](https://github.com/coinbase/terraform-landsc
 
 ## Usage
 
-### Files
+`tfplan <path_or_files> "<glob_limit>" <additional_tf_flags>`
 
-`tfplan` with argument of filenames separated with comma sign.
+Where:
 
-Example:
-`tfplan file1.tf,file2.tf`
+* `<path_or_files>` is a string that may be used as
+    * `file1.tf,file2.tf` - comma separated string of files, where `terraform plan` with `-target` will be run limited to all resources/modules present in those files only
+    * `./my-dir` - as a plain string with path so all resources/modules from `./my-dir` path will be discovered
 
-will run `terraform plan` with `-target` set to all resources/modules present in those files only.
+* `<glob_limit>` (comma separated string) allows defining wildcard syntax matching for resources/modules, options are:
+    * `"google_compute_address.custom-*"`, so it matches all resources of type `google_compute_address` and name starting with `custom-`
+    * `""`, (empty string) so it matches all resources based on autodiscovery from `<path_or_files>` param
+    * or even `google_compute_address.*,custom-*`, so it matches all resources of type `google_compute_address` and all resources/modules that have `custom-` string anywhere
 
-### Path
+PLEASE NOTICE: any glob limit must be defined inside `""` marks so it's not interpreted by your bash.
 
-`tfplan .`
+* `<additional_tf_flags>` defined as comma separated string with tf flags, examples:
+    * `-destroy`
+    * `-lock=false,-parallelism=1`
 
-All resources/modules from `.` will be discovered.
+### Example commands
+
+`tfplan "70_cluster.tf" "google_compute_address.*"` 
+- loads all `google_compute_address` resources from `70_cluster.tf` file.
+
+`tfplan 70_cluster.tf "google_compute_firewall.my-cluster-*" "-destroy,-lock=false"` 
+- loads all `google_compute_firewall` resources where object name starts with `my-cluster-` and set tf flags to `-destroy -lock=false`
+
+`tfplan 70_cluster.tf "google_compute_*"`
+- loads all `google_compute_*` resources
