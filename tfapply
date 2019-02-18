@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+command="terraform apply $PWD/plan"
+
+echo -e <<EOF "################################################
+# tfplan (https://github.com/mkubaczyk/tfplan) #
+################################################
+========
+Applying $PWD/plan plan file
+"
+EOF
+
+eval $command
