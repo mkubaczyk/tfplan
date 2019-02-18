@@ -2,32 +2,75 @@
 
 set -e
 
-additional_flags=$2
 command="terraform plan -out=plan"
-if [[ ! -z $additional_flags ]]; then
-    command="$command $additional_flags"
-fi
+
+# files/path
 if [[ -d $1 ]]; then
 	files=( `ls *.tf` )
 else
 	IFS=', ' read -r -a files <<< "$1"
 fi
 
+# glob limits
+limit_rules=()
+if [[ $2 ]]; then
+    IFS=', ' read -r -a limit_rules <<< "$2"
+fi
+
+# additional flags
+if [[ ! -z $3 ]]; then
+    IFS=', ' read -r -a additional_flags <<< "$3"
+    for flag in "${additional_flags[@]}"
+    do
+        command="$command $flag"
+    done
+fi
+
+# reading files and discovering resources/modules
+resources_and_modules=()
 for filename in "${files[@]}"
 do
     while read -r line; do
+        object=""
         if [[ "$line" =~ ^resource ]]; then
             resource_type=$(echo $line | cut -d '"' -f 2)
             resource_name=$(echo $line | cut -d '"' -f 4)
-            command="$command -target=$resource_type.$resource_name"
+            object="$resource_type.$resource_name"
         fi
         if [[ "$line" =~ ^module ]]; then
             resource_type=$(echo $line | cut -d '"' -f 1)
             resource_name=$(echo $line | cut -d '"' -f 2)
             resource_type=${resource_type%?}
-            command="$command -target=$resource_type.$resource_name"
+            object="$resource_type.$resource_name"
+        fi
+        if [[ $object ]]; then
+            # if any glob limit was defined, check found object against it
+            if [[ $limit_rules ]]; then
+                for rule in "${limit_rules[@]}"
+                do
+                    if [[ $object =~ $rule ]]; then
+                        resources_and_modules+=($object)
+                    fi
+                done
+            else
+                resources_and_modules+=($object)
+            fi
         fi
     done < "$filename"
+done
+
+echo -e <<EOF "################################################
+# tfplan (https://github.com/mkubaczyk/tfplan) #
+################################################
+========
+Targets:
+"
+EOF
+
+for object in "${resources_and_modules[@]}"
+do
+    command="$command -target=$object"
+    echo $object
 done
 
 if [[ `which landscape` ]]; then
@@ -35,12 +78,14 @@ if [[ `which landscape` ]]; then
 fi
 
 echo -e <<EOF "
-################################################
-# tfplan (https://github.com/mkubaczyk/tfplan) #
-################################################
-============
+========
+Command:
+
 $command
-============"
+
+=======
+Output:
+"
 EOF
 
 eval $command
