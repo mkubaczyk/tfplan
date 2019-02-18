@@ -8,6 +8,8 @@ Run `terraform plan` with `-target` specified for autodiscovered resources/modul
 
 ### Optional requirements
 
+`ln -s $PWD/tfplan /usr/local/bin/tfapply` can be linked as well, so you can follow naming convention for commands.
+
 If `landscape` (install from [here](https://github.com/coinbase/terraform-landscape)) is in PATH,
 `terraform plan` will be parsed with it.
 
@@ -32,7 +34,11 @@ PLEASE NOTICE: any glob limit must be defined inside `""` marks so it's not inte
     * `-destroy`
     * `-lock=false,-parallelism=1`
 
-### Example commands
+## Result
+
+Script prints plan to stdout and creates `plan` file, which later can be used with `terraform apply plan`.
+
+## Example commands
 
 `tfplan "70_cluster.tf" "google_compute_address.*"` 
 - loads all `google_compute_address` resources from `70_cluster.tf` file.
