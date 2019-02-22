@@ -15,7 +15,7 @@ If `landscape` (install from [here](https://github.com/coinbase/terraform-landsc
 
 ## Usage
 
-```$ tfplan [-f|--file filename] [-l|--limit "rule\] [--dry-run] [positional arguments]```
+```$ tfplan [-f|--file filename] [-l|--limit "rule"] [--dry-run] [positional arguments]```
 
 * `-f|--file`                   filename|directory to discover resources from
 * `-l|--limit`                  wildcard style rule to limit resources with (must be wrapped with " "]
