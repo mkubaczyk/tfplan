@@ -8,7 +8,7 @@ Run `terraform plan` with `-target` specified for autodiscovered resources/modul
 
 ### Optional requirements
 
-`ln -s $PWD/tfplan /usr/local/bin/tfapply` can be linked as well, so you can follow naming convention for commands.
+`ln -s $PWD/tfapply /usr/local/bin/tfapply` can be linked as well, so you can follow naming convention for commands.
 
 If `landscape` (install from [here](https://github.com/coinbase/terraform-landscape)) is in PATH,
 `terraform plan` will be parsed with it.
