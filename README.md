@@ -15,36 +15,17 @@ If `landscape` (install from [here](https://github.com/coinbase/terraform-landsc
 
 ## Usage
 
-`tfplan <path_or_files> "<glob_limit>" <additional_tf_flags>`
+```$ tfplan [-f|--file filename] [-l|--limit "rule\] [--dry-run] [positional arguments]```
 
-Where:
+* `-f|--file`                   filename|directory to discover resources from
+* `-l|--limit`                  wildcard style rule to limit resources with (must be wrapped with " "]
+* `-h|--help`                   display help
+* `--dry-run`                   print steps without invoking them
+* `positional arguemnts`        any flag from terraform, that needs to be invoked with tfplan
+### Examples
 
-* `<path_or_files>` is a string that may be used as
-    * `file1.tf,file2.tf` - comma separated string of files, where `terraform plan` with `-target` will be run limited to all resources/modules present in those files only
-    * `./my-dir` - as a plain string with path so all resources/modules from `./my-dir` path will be discovered
+* ```$ tfplan -f . -l "google_compute_firewall.*"``` - will discover all files from . path (current directory) and will limits resources to google_compute_firewall only
 
-* `<glob_limit>` (comma separated string) allows defining wildcard syntax matching for resources/modules, options are:
-    * `"google_compute_address.custom-*"`, so it matches all resources of type `google_compute_address` and name starting with `custom-`
-    * `""`, (empty string) so it matches all resources based on autodiscovery from `<path_or_files>` param
-    * or even `google_compute_address.*,custom-*`, so it matches all resources of type `google_compute_address` and all resources/modules that have `custom-` string anywhere
+* ```$ tfplan --file 10_firewall.tf -l "my_firewall_*"``` - will get resources from 10_firewall.tf file and limit them to those containing \"my_firewall_\" in the name
 
-PLEASE NOTICE: any glob limit must be defined inside `""` marks so it's not interpreted by your bash.
-
-* `<additional_tf_flags>` defined as comma separated string with tf flags, examples:
-    * `-destroy`
-    * `-lock=false,-parallelism=1`
-
-## Result
-
-Script prints plan to stdout and creates `plan` file, which later can be used with `terraform apply plan`.
-
-## Example commands
-
-`tfplan "70_cluster.tf" "google_compute_address.*"` 
-- loads all `google_compute_address` resources from `70_cluster.tf` file.
-
-`tfplan 70_cluster.tf "google_compute_firewall.my-cluster-*" "-destroy,-lock=false"` 
-- loads all `google_compute_firewall` resources where object name starts with `my-cluster-` and set tf flags to `-destroy -lock=false`
-
-`tfplan 70_cluster.tf "google_compute_*"`
-- loads all `google_compute_*` resources
+* ```$ tfplan --file 10_firewall.tf -destroy``` - will destroy every resource from 10_firewall.tf file
