@@ -109,12 +109,14 @@ parse() {
             if [[ $limits_to_use ]]; then
                 for rule in "${limits_to_use[@]}"
                 do
-                    if [[ $last_object =~ $rule ]]; then
+                    if [[ $last_object =~ $rule ]] && [[ $last_object ]]; then
                         resources_and_modules+=($last_object)
                     fi
                 done
             else
-                resources_and_modules+=($last_object)
+                if [[ $last_object ]]; then
+                    resources_and_modules+=($last_object)
+                fi
             fi
             last_added_object=$last_object
         fi
