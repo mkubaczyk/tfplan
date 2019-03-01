@@ -2,6 +2,7 @@
 
 set -e
 
+
 usage() {
 echo -e <<EOF "################################################
 # tfplan (https://github.com/mkubaczyk/tfplan) #
@@ -12,6 +13,7 @@ usage: tfplan [-f|--file filename] [-l|--limit \"rule\"] [--dry-run] [positional
 -f|--file                    filename|directory to discover resources from
 -l|--limit                   wildcard style rule to limit resources with (must be wrapped with " "]
 -h|--help                    display help
+-d|--git-diff                read resources/modules from git diff, automatically disables reading from files even if defined
 --dry-run                    print steps without invoking them
 positional arguments         any flag from terraform, that needs to be invoked with tfplan
 
@@ -27,12 +29,19 @@ will get resources from 10_firewall.tf file and limit them to those containing \
 $ tfplan --file 10_firewall.tf -destroy
 will destroy every resource from 10_firewall.tf file
 
+$ tfplan --git-diff
+will read resources and modules into targets from git diff
+
+$ tfplan --git-diff -l \"google_compute_firewall.*\"
+will read resources from git diff and limit them to google_compute_firewall kind only
+
 "
 EOF
 }
 
 command="terraform plan -out=plan"
 dry_run=false
+git_diff=false
 files=()
 limits=()
 flags=()
@@ -65,6 +74,10 @@ do
             dry_run=true
             shift
             ;;
+        -d|--git-diff)
+            git_diff=true
+            shift
+            ;;
         -h|--help)
             usage
             exit 0
@@ -76,20 +89,53 @@ do
     esac
 done
 
-files_to_read=()
-for file in "${files[@]}"
-do
-    current_files=()
-    IFS=', ' read -r -a current_files <<< "$file"
-    for current_file in "${current_files[@]}"
-    do
-        if [[ -d $current_file ]]; then
-            files_to_read+=( `ls $current_file | grep .tf` )
-        else
-            files_to_read+=($current_file)
+parse() {
+    object=""
+    if [[ "$1" =~ ^\+?resource ]]; then
+        resource_type=$(echo $1 | cut -d '"' -f 2)
+        resource_name=$(echo $1 | cut -d '"' -f 4)
+        object="$resource_type.$resource_name"
+        last_object=$object
+    fi
+    if [[ "$1" =~ ^\+?module ]]; then
+        resource_type=$(echo $1 | cut -d '"' -f 1)
+        resource_name=$(echo $1 | cut -d '"' -f 2)
+        resource_type=${resource_type%?}
+        object="$resource_type.$resource_name"
+        last_object=$object
+    fi
+    if [[ $git_diff == "true" ]]; then
+        if [[ "$1" =~ ^\+ ]] && [[ $last_object != $last_added_object ]]; then
+            if [[ $limits_to_use ]]; then
+                for rule in "${limits_to_use[@]}"
+                do
+                    if [[ $last_object =~ $rule ]]; then
+                        resources_and_modules+=($last_object)
+                    fi
+                done
+            else
+                resources_and_modules+=($last_object)
+            fi
+            last_added_object=$last_object
         fi
-    done
-done
+    else
+        if [[ $object ]]; then
+            if [[ $limits_to_use ]]; then
+                for rule in "${limits_to_use[@]}"
+                do
+                    if [[ $object =~ $rule ]]; then
+                        resources_and_modules+=($object)
+                    fi
+                done
+            else
+                resources_and_modules+=($object)
+            fi
+        fi
+    fi
+}
+resources_and_modules=()
+last_found_object=""
+last_added_object=""
 
 limits_to_use=()
 for limit in "${limits[@]}"
@@ -107,36 +153,35 @@ do
     command="$command $arg"
 done
 
-resources_and_modules=()
-for filename in "${files_to_read[@]}"
-do
-    while read -r line; do
-        object=""
-        if [[ "$line" =~ ^resource ]]; then
-            resource_type=$(echo $line | cut -d '"' -f 2)
-            resource_name=$(echo $line | cut -d '"' -f 4)
-            object="$resource_type.$resource_name"
-        fi
-        if [[ "$line" =~ ^module ]]; then
-            resource_type=$(echo $line | cut -d '"' -f 1)
-            resource_name=$(echo $line | cut -d '"' -f 2)
-            resource_type=${resource_type%?}
-            object="$resource_type.$resource_name"
-        fi
-        if [[ $object ]]; then
-            if [[ $limits_to_use ]]; then
-                for rule in "${limits_to_use[@]}"
-                do
-                    if [[ $object =~ $rule ]]; then
-                        resources_and_modules+=($object)
-                    fi
-                done
+if [[ $git_diff == "true" ]]; then
+    diff_output=$(git diff --no-prefix -U10000)
+    while read -r line;
+    do
+        parse "$line"
+    done <<< "$diff_output"
+else
+    files_to_read=()
+    for file in "${files[@]}"
+    do
+        current_files=()
+        IFS=', ' read -r -a current_files <<< "$file"
+        for current_file in "${current_files[@]}"
+        do
+            if [[ -d $current_file ]]; then
+                files_to_read+=( `ls $current_file | grep .tf` )
             else
-                resources_and_modules+=($object)
+                files_to_read+=($current_file)
             fi
-        fi
-    done < "$filename"
-done
+        done
+    done
+
+    for filename in "${files_to_read[@]}"
+    do
+        while read -r line; do
+            parse "$line"
+        done < "$filename"
+    done
+fi
 
 echo -e <<EOF "################################################
 # tfplan (https://github.com/mkubaczyk/tfplan) #
@@ -145,6 +190,11 @@ echo -e <<EOF "################################################
 Targets:
 "
 EOF
+
+if [[ $git_diff == "true" ]] || [[ ${#files_to_read[@]} -gt 0 ]] && [[ ${#resources_and_modules[@]} -eq 0 ]]; then
+    echo "No targets were found, exiting"
+    exit 1
+fi
 
 for object in "${resources_and_modules[@]}"
 do
