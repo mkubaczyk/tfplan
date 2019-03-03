@@ -22,6 +22,7 @@ If `landscape` (install from [here](https://github.com/coinbase/terraform-landsc
 * `-h|--help`                   display help
 * `--dry-run`                   print steps without invoking them
 * `-d|--git-diff`               read resources/modules from git diff, automatically disables reading from files even if defined
+* `--version`                   check current version and the newest one available, offers automatic update if newer is available
 * `positional arguemnts`        any flag from terraform, that needs to be invoked with tfplan
 ### Examples
 
