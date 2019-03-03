@@ -15,7 +15,7 @@ usage: tfplan [-f|--file filename] [-l|--limit \"rule\"] [--dry-run] [positional
 -h|--help                    display help
 -d|--git-diff                read resources/modules from git diff, automatically disables reading from files even if defined
 --dry-run                    print steps without invoking them
---version                   check current version and the newest one available, offers automatic update if newer is available
+--version                    check current version and the newest one available, offers automatic update if newer is available
 positional arguments         any flag from terraform, that needs to be invoked with tfplan
 
 
