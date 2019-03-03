@@ -1,0 +1,28 @@
+diff --git a/tests/example.tf b/tests/example.tf
+index 9e8ea44..1edb619 100644
+--- a/tests/example.tf
++++ b/tests/example.tf
+@@ -6,17 +6,18 @@ resource "google_compute_address" "01" {
+   name = "address01"
+ }
+ 
+-resource "google_compute_address" "02" {
+-  name = "address02"
+-}
+-
+ ############
+ # networks #
+ ############
+ 
++resource "google_compute_network" "03" {
++  name = "network03"
++  auto_create_subnetworks = false
++}
++
+ resource "google_compute_network" "01" {
+   name = "network01"
+-  auto_create_subnetworks = true
++  auto_create_subnetworks = false
+ }
+ 
+ resource "google_compute_network" "02" {

@@ -1,0 +1,16 @@
+################################################
+# tfplan (https://github.com/mkubaczyk/tfplan) #
+################################################
+========
+Targets:
+
+google_compute_network.02
+
+========
+Command:
+
+terraform plan -out=plan -target=google_compute_network.02 | landscape
+
+=======
+Output:
+
