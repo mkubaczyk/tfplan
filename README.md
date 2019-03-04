@@ -1,14 +1,15 @@
 # tfplan
 
-Run `terraform plan` with `-target` specified for autodiscovered resources/modules from given files or location.
+Run `terraform plan` with `-target` specified for autodiscovered resources/modules from given files or location or even based on `git diff` command result.
 
 ## Install
 
+Clone this repository into your preferred location, `cd` into it and invoke
 `ln -s $PWD/tfplan /usr/local/bin/tfplan`
 
 ### Optional requirements
 
-`ln -s $PWD/tfapply /usr/local/bin/tfapply` can be linked as well, so you can follow naming convention for commands.
+`ln -s $PWD/tfapply /usr/local/bin/tfapply` can be linked as well, so you can follow naming convention for apply command as well.
 
 If `landscape` (install from [here](https://github.com/coinbase/terraform-landscape)) is in PATH,
 `terraform plan` will be parsed with it.
