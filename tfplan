@@ -143,7 +143,7 @@ parse() {
         last_object=$object
     fi
     if [[ $git_diff == "true" ]]; then
-        if [[ "$1" =~ ^(\+|-)[^\s$] ]] && [[ $last_object != $last_added_object ]]; then
+        if [[ "$1" =~ ^(\+|-)[^\s$] ]] && [[ ! "$1" =~ ^(---|\+\+\+) ]] && [[ $last_object != $last_added_object ]]; then
             if [[ $limits_to_use ]]; then
                 for rule in "${limits_to_use[@]}"
                 do
