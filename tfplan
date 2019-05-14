@@ -74,7 +74,7 @@ version() {
     fi
 }
 
-command="terraform plan -out=plan"
+command="terraform plan -out=plan.tfplan"
 dry_run=false
 git_diff=false
 files=()
