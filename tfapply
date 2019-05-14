@@ -2,13 +2,13 @@
 
 set -e
 
-command="terraform apply $PWD/plan"
+command="terraform apply $PWD/plan.tfplan"
 
 echo -e <<EOF "################################################
 # tfplan (https://github.com/mkubaczyk/tfplan) #
 ################################################
 ========
-Applying $PWD/plan plan file
+Applying $PWD/plan.tfplan plan file
 "
 EOF
 
