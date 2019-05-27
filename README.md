@@ -21,7 +21,7 @@ If `landscape` (install from [here](https://github.com/coinbase/terraform-landsc
 * `-f|--file`                   filename|directory to discover resources from
 * `-l|--limit`                  wildcard style rule to limit resources with (must be wrapped with " "]
 * `-h|--help`                   display help
-* `-d|--git-diff`               read resources/modules from git diff, automatically disables reading from files even if defined
+* `-d|--git-diff`               read resources/modules from git diff (staged and not staged changes, without untracked), automatically disables reading from files even if defined
 * `--dry-run`                   print steps without invoking them
 * `--version`                   check current version and the newest one available, offers automatic update if newer is available
 * `positional arguemnts`        any flag from terraform, that needs to be invoked with tfplan
@@ -36,3 +36,7 @@ If `landscape` (install from [here](https://github.com/coinbase/terraform-landsc
 * ```$ tfplan --git-diff``` - will read resources and modules into targets from git diff
 
 * ```$ tfplan --git-diff -l "google_compute_firewall.*"``` - will read resources from git diff and limit them to google_compute_firewall kind only
+
+### --git-diff
+
+This flag takes git diff staged and to be staged files, excluding untracked by git, into consideration and ignores reading from files defined with other parameters.

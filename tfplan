@@ -194,7 +194,7 @@ do
 done
 
 if [[ $git_diff == "true" ]]; then
-    diff_output=$(git diff --no-prefix -U10000)
+    diff_output=$(git diff --no-prefix -U10000 HEAD)
     while read -r line;
     do
         parse "$line"
