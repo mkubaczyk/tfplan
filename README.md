@@ -21,7 +21,8 @@ If `landscape` (install from [here](https://github.com/coinbase/terraform-landsc
 * `-f|--file`                   filename|directory to discover resources from
 * `-l|--limit`                  wildcard style rule to limit resources with (must be wrapped with " "]
 * `-h|--help`                   display help
-* `-d|--git-diff`               read resources/modules from git diff (staged and not staged changes, without untracked), automatically disables reading from files even if defined
+* `-d|--git-diff`               read resources/modules from git diff, automatically disables reading from files even if defined, defaults to staged and unstaged changes to current commit, without untracked, or specify with --git-ref
+* `-r|--git-ref`                specify which commits to diff between, using git diff format (`<commit>..<commit>`. Defaults to `HEAD` (staged and unstaged changes to current commit, without untracked)
 * `--dry-run`                   print steps without invoking them
 * `--version`                   check current version and the newest one available, offers automatic update if newer is available
 * `positional arguemnts`        any flag from terraform, that needs to be invoked with tfplan
@@ -39,4 +40,4 @@ If `landscape` (install from [here](https://github.com/coinbase/terraform-landsc
 
 ### --git-diff
 
-This flag takes git diff staged and to be staged files, excluding untracked by git, into consideration and ignores reading from files defined with other parameters.
+This flag uses git diff to determine what changed. By default it uses staged and to be staged files, excluding untracked by git, into consideration, but any commit diff that would be [accepted by `git diff`](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt-emgitdiffemltoptionsgtltcommitgtltcommitgt--ltpathgt82308203) will work. Using this option makes tfplan ignore files defined with other parameters.

@@ -13,7 +13,8 @@ usage: tfplan [-f|--file filename] [-l|--limit \"rule\"] [--dry-run] [positional
 -f|--file                    filename|directory to discover resources from
 -l|--limit                   wildcard style rule to limit resources with (must be wrapped with " "]
 -h|--help                    display help
--d|--git-diff                read resources/modules from git diff, automatically disables reading from files even if defined
+-d|--git-diff                read resources/modules from git diff, automatically disables reading from files even if defined, defaults to staged and unstaged changes to current commit, without untracked, or specify with --git-ref
+-r|--git-ref                 specify which commits to diff between, using git diff format (<commit>..<commit>. Defaults to HEAD (staged and unstaged changes to current commit, without untracked)
 --dry-run                    print steps without invoking them
 --version                    check current version and the newest one available, offers automatic update if newer is available
 positional arguments         any flag from terraform, that needs to be invoked with tfplan
@@ -31,7 +32,10 @@ $ tfplan --file 10_firewall.tf -destroy
 will destroy every resource from 10_firewall.tf file
 
 $ tfplan --git-diff
-will read resources and modules into targets from git diff
+will read resources and modules into targets from git diff 
+
+$ tfplan --git-diff --git-ref dev..main
+will read resources and modules into targets from git diff between dev and main (specified by -r|--git-ref)
 
 $ tfplan --git-diff -l \"google_compute_firewall.*\"
 will read resources from git diff and limit them to google_compute_firewall kind only
@@ -77,6 +81,7 @@ version() {
 command="terraform plan -out=plan.tfplan"
 dry_run=false
 git_diff=false
+git_ref="HEAD"
 files=()
 limits=()
 flags=()
@@ -112,6 +117,16 @@ do
         -d|--git-diff)
             git_diff=true
             shift
+            ;;
+	-r|--git-ref)
+            if [[ $1 == *=* ]]; then
+	        git_ref=("$(echo "$1" | cut -d '=' -f 2)")
+                shift
+            else
+                git_ref=("$2")
+                shift
+                shift
+            fi
             ;;
         -h|--help)
             usage
@@ -194,7 +209,7 @@ do
 done
 
 if [[ $git_diff == "true" ]]; then
-    diff_output=$(git diff --no-prefix -U10000 HEAD)
+    diff_output=$(git diff --no-prefix -U10000 "$git_ref")
     while read -r line;
     do
         parse "$line"
