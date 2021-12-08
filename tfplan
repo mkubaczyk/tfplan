@@ -120,10 +120,10 @@ do
             ;;
 	-r|--git-ref)
             if [[ $1 == *=* ]]; then
-	        git_ref=("$(echo "$1" | cut -d '=' -f 2)")
+	        git_ref="$(echo "$1" | cut -d '=' -f 2)"
                 shift
             else
-                git_ref=("$2")
+                git_ref="$2"
                 shift
                 shift
             fi
@@ -209,7 +209,7 @@ do
 done
 
 if [[ $git_diff == "true" ]]; then
-    diff_output=$(git diff --no-prefix -U10000 "$git_ref")
+    diff_output=$(git diff --no-prefix -U10000 "$git_ref" -- *.tf)
     while read -r line;
     do
         parse "$line"
