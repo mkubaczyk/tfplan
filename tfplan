@@ -145,13 +145,13 @@ done
 
 parse() {
     object=""
-    if [[ "$1" =~ ^(\+|-)?resource ]]; then
+    if [[ "$1" =~ ^(\+|-)?resource[[:space:]] ]]; then
         resource_type=$(echo $1 | cut -d '"' -f 2)
         resource_name=$(echo $1 | cut -d '"' -f 4)
         object="$resource_type.$resource_name"
         last_object=$object
     fi
-    if [[ "$1" =~ ^(\+|-)?module ]]; then
+    if [[ "$1" =~ ^(\+|-)?module[[:space:]] ]]; then
         resource_type="module"
         resource_name=$(echo $1 | cut -d '"' -f 2)
         object="$resource_type.$resource_name"
