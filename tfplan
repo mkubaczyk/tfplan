@@ -209,7 +209,7 @@ do
 done
 
 if [[ $git_diff == "true" ]]; then
-    diff_output=$(git diff --no-prefix -U10000 "$git_ref" -- *.tf)
+    diff_output=$(git diff --no-prefix -U10000 "$git_ref" -- \*.tf)
     while read -r line;
     do
         parse "$line"
